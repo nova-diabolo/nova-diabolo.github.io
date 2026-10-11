@@ -198,12 +198,12 @@
       </div>
 
       <!-- Web3Forms relays this to the team inbox (GitHub Pages can't send mail itself).
-           NOT LIVE until access_key below is filled in. Get one in ~2 minutes at
-           https://web3forms.com — enter the destination address, they email back a
-           UUID. No account, no password. The UUID is all that appears in this page,
-           so the email address is never exposed to scrapers. -->
+           The access key is a public site identifier, not a secret: it is meant to
+           sit in client-side HTML. The destination inbox is configured in the
+           Web3Forms dashboard, so it can be changed there without touching this
+           file, and no email address is ever exposed here. -->
       <form class="relay-form" action="https://api.web3forms.com/submit" method="POST">
-        <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE">
+        <input type="hidden" name="access_key" value="6461925c-7e1f-43b8-8858-00c203abd0d5">
         <input type="hidden" name="subject" id="formSubject" value="Message from the Nova Diabolo site">
         <input type="hidden" name="from_name" value="Nova Diabolo website">
         <input type="hidden" name="redirect" value="https://nova-diabolo.github.io/thanks.html">
