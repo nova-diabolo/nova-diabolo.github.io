@@ -86,6 +86,31 @@ def knockout(im, lo=52, hi=104, color=(74, 74, 70), strength=0.85):
     return Image.merge("RGBA", (r, g, b, alpha))
 
 
+def favicons():
+    """Build the tab icon from the logo.
+
+    The mark sits in a lot of empty black, so it gets cropped tight before
+    scaling down, otherwise it's unreadable in a tab. favicon.ico lives at the
+    site root because that's what browsers request without being asked.
+    """
+    from PIL import ImageChops
+    src = Image.open(OUT / "logo-square.jpg").convert("RGB")
+    grey = src.convert("L")
+    bbox = ImageChops.difference(grey, Image.new("L", grey.size, 0)) \
+        .point(lambda v: 255 if v > 40 else 0).getbbox()
+    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    side = max(w, h) + int(max(w, h) * 0.10) * 2
+    cx, cy = (bbox[0] + bbox[2]) // 2, (bbox[1] + bbox[3]) // 2
+    mark = src.crop((cx - side // 2, cy - side // 2, cx + side // 2, cy + side // 2))
+
+    mark.resize((256, 256), Image.LANCZOS).save(
+        ROOT / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48), (64, 64)])
+    for size in (32, 192):
+        mark.resize((size, size), Image.LANCZOS).save(OUT / f"favicon-{size}.png")
+    mark.resize((180, 180), Image.LANCZOS).save(OUT / "apple-touch-icon.png")
+    print("favicons   <- logo-square.jpg")
+
+
 def main():
     name, cx, cy, hf = HERO
     save(crop(load(name), 4 / 5, cx, cy, hf), OUT / "hero" / "hero", [1400, 900], jpg=True)
@@ -97,6 +122,8 @@ def main():
             img = knockout(img)
         save(img, OUT / "team" / slug, [700])
         print(f"{slug:<10} <- {name}.jpg")
+
+    favicons()
 
     print("\nDone.")
 
