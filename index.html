@@ -91,10 +91,17 @@
       <div class="section-head">
         <h2 class="section-title">Performances</h2>
       </div>
-      <!-- These link out rather than embedding because "Allow embedding" is currently
-           off on the uploads, so an inline player just shows "Video unavailable".
-           Turn it on per video in YouTube Studio (Edit -> Show more) and these can
-           become click-to-play iframes instead. -->
+      <!-- These link out to YouTube rather than embedding, deliberately.
+           An inline player renders "This video is unavailable" for all four, while
+           a public control video embeds fine from this same page. It is not the
+           "Allow embedding" setting: the videos report playableInEmbed=true, and
+           are neither private nor unlisted. What they do have, and the control
+           doesn't, is a Content ID music match (1-2 identified songs each). The
+           rights holder's policy permits playback on youtube.com but blocks it
+           off-platform, which is exactly this symptom.
+           Nothing here can work around that. It would need the claim gone
+           (Studio -> Editor -> erase/replace song), after which these could become
+           click-to-play iframes again. -->
       <div class="videos">
         <article class="video-card">
           <a class="video-frame" href="https://www.youtube.com/watch?v=WlddRbIC2Yo"
