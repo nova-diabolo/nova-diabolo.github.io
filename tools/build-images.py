@@ -89,26 +89,40 @@ def knockout(im, lo=52, hi=104, color=(74, 74, 70), strength=0.85):
 def favicons():
     """Build the tab icon from the logo.
 
-    The mark sits in a lot of empty black, so it gets cropped tight before
-    scaling down, otherwise it's unreadable in a tab. favicon.ico lives at the
-    site root because that's what browsers request without being asked.
+    Circular, not square: a black square favicon reads as an obvious box against
+    a light browser tab. The disc is sized from the furthest lit pixel rather
+    than from the bounding box, because the mark's three spokes radiate past the
+    circle and a bbox-sized crop clips their tips.
     """
-    from PIL import ImageChops
-    src = Image.open(OUT / "logo-square.jpg").convert("RGB")
-    grey = src.convert("L")
-    bbox = ImageChops.difference(grey, Image.new("L", grey.size, 0)) \
-        .point(lambda v: 255 if v > 40 else 0).getbbox()
-    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    side = max(w, h) + int(max(w, h) * 0.10) * 2
-    cx, cy = (bbox[0] + bbox[2]) // 2, (bbox[1] + bbox[3]) // 2
-    mark = src.crop((cx - side // 2, cy - side // 2, cx + side // 2, cy + side // 2))
+    import math
+    from PIL import ImageChops, ImageDraw
 
-    mark.resize((256, 256), Image.LANCZOS).save(
-        ROOT / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48), (64, 64)])
+    src = Image.open(OUT / "logo-square.jpg").convert("RGB")
+    lit = src.convert("L").point(lambda v: 255 if v > 40 else 0)
+    bbox = lit.getbbox()
+    cx, cy = (bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2
+
+    px = lit.load()
+    maxr = max(math.hypot(x - cx, y - cy)
+               for y in range(bbox[1], bbox[3])
+               for x in range(bbox[0], bbox[2]) if px[x, y])
+    r = maxr * 1.14                      # breathing room inside the disc
+    mark = src.crop((int(cx - r), int(cy - r), int(cx + r), int(cy + r))).convert("RGBA")
+
+    def disc(im, size):
+        big = im.resize((size * 4, size * 4), Image.LANCZOS)
+        mask = Image.new("L", (size * 4, size * 4), 0)
+        ImageDraw.Draw(mask).ellipse((0, 0, size * 4 - 1, size * 4 - 1), fill=255)
+        big.putalpha(mask)
+        return big.resize((size, size), Image.LANCZOS)
+
+    # browsers request /favicon.ico without being told to, so it lives at the root
+    disc(mark, 256).save(ROOT / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48), (64, 64)])
     for size in (32, 192):
-        mark.resize((size, size), Image.LANCZOS).save(OUT / f"favicon-{size}.png")
-    mark.resize((180, 180), Image.LANCZOS).save(OUT / "apple-touch-icon.png")
-    print("favicons   <- logo-square.jpg")
+        disc(mark, size).save(OUT / f"favicon-{size}.png")
+    # iOS applies its own rounded mask, so the touch icon stays a full square
+    mark.convert("RGB").resize((180, 180), Image.LANCZOS).save(OUT / "apple-touch-icon.png")
+    print("favicons   <- logo-square.jpg (circular)")
 
 
 def main():
