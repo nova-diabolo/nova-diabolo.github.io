@@ -49,11 +49,22 @@
 
   if (reason && bookingFields && subject) {
     var SUBJECTS = {
-      "Booking a performance":   "Booking inquiry from the website",
-      "Lessons or a workshop":   "Lessons / workshop inquiry from the website",
-      "Coming to yoyo with you": "Someone wants to come yoyo with us",
-      "Something else":          "Message from the Nova Diabolo site"
+      "Booking a performance": "Booking inquiry from the website",
+      "Lessons or workshop":   "Lessons / workshop inquiry from the website",
+      "Joining the team":      "Someone wants to join the team",
+      "Something else":        "Message from the Nova Diabolo site"
     };
+
+    // Prompt for what's useful to know, per reason. Blank until they pick one.
+    var HINTS = {
+      "Booking a performance": "Tell us about your event: what your expected audience size is, whether it's indoor or outdoor, and how long a set you want.",
+      "Lessons or workshop":   "Tell us who it's for, how many people you're thinking, and when you'd like to run it.",
+      "Joining the team":      "Tell us about yourself! How long you've played diabolo, where you're based, anything else you want us to know.",
+      "Something else":        "Tell us what's on your mind."
+    };
+
+    var message = document.getElementById("message");
+
     reason.addEventListener("change", function () {
       var booking = reason.value === "Booking a performance";
       bookingFields.hidden = !booking;
@@ -61,6 +72,7 @@
         el.disabled = !booking;
       });
       subject.value = SUBJECTS[reason.value] || SUBJECTS["Something else"];
+      if (message) message.placeholder = HINTS[reason.value] || "";
     });
   }
 
