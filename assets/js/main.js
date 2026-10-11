@@ -109,7 +109,7 @@
           var sel = form.querySelector("#reason");
           if (sel) sel.dispatchEvent(new Event("change"));
           statusEl.className = "form-status is-ok";
-          statusEl.textContent = "Thanks, that's sent. We'll be in touch.";
+          statusEl.textContent = "Thanks, we'll be in touch.";
           btn.textContent = "Sent";
         })
         .catch(function () {
